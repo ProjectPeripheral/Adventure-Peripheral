@@ -27,9 +27,8 @@ import dan200.turtle.shared.TileEntityTurtle;
 
 public class TileEntityPeripheral extends TileEntity implements IPeripheral
 {
-        IComputerAccess computers = null;
-        public String side = "";
         public IComputerAccess comp = null;
+        public  String[] allMethods = { "getBlock", "setBlock", "findPeripheral", "findComputer","playerCoords", "getHealth", "attackPlayer","setPlayerPos", "givePlayer", "getPlayers", "say", "createFireball", "playerLooking", "createExplosion", "getDirection" };
 
         public String getType()
         {
@@ -39,24 +38,23 @@ public class TileEntityPeripheral extends TileEntity implements IPeripheral
         
         public String[] getMethodNames()
         {
-                return new String[] { "getBlock", "setBlock", "findPeripheral", "findComputer","playerCoords", "getHealth", "attackPlayer","setPlayerPos", "givePlayer", "getPlayers", "say", "createFireball", "playerLooking", "createExplosion", "getDirection" };
+                return allMethods;
         }
 
         public Object[] callMethod(IComputerAccess computer, int method, Object[] arguments)
         {
         	switch(method){ 
-        	case 0: {
+        	case 0: { //Returns the blockID and Metadata
         		if (arguments.length < 3) {
         			return new Object[] {false, "Requires 3 arguments"};
         		} else {
-        		World world = this.worldObj;
     			int x = ((Double) arguments[0]).intValue();
     			int y = ((Double) arguments[1]).intValue();
     			int z = ((Double) arguments[2]).intValue();
-    			return new Object[] {world.getBlockId(x, y, z), world.getBlockMetadata(x,y,z)};
+    			return new Object[] {this.worldObj.getBlockId(x, y, z), this.worldObj.getBlockMetadata(x,y,z)};
         		}
         	}
-        	case 1: {
+        	case 1: { //Sets blockID and (optionally) Metadata
         		if (arguments.length < 4) {
         			return new Object[] {false, "Requires at least 4 arguments"};
         		} else {
@@ -81,14 +79,14 @@ public class TileEntityPeripheral extends TileEntity implements IPeripheral
 	    			}
         		}
         	}
-        	case 2: {
+        	case 2: { //Gets the peripheral x,y,z coords
         		return new Object[] {this.xCoord, this.yCoord, this.zCoord};
         	}
-        	case 3: {
+        	case 3: { //Gets the attached computer x,y,z coords
         		int[] coords = getComputer();
         		return new Object[] {coords[0],coords[1],coords[2]};
         	}
-        	case 4: {
+        	case 4: { //Gets the player position
         		if (arguments.length < 1) {
         			return new Object[] {false, "Requires a string"};
         		} else {
@@ -101,7 +99,7 @@ public class TileEntityPeripheral extends TileEntity implements IPeripheral
         		}
         		}
         	}
-        	case 5: {
+        	case 5: { //Tests to see if the player is on the server and then returns that players health if they do exist
         		EntityPlayer player = this.worldObj.getPlayerEntityByName((String) arguments[0]);
         		if (player != null) {
         			return new Object[] {player.getHealth()};
@@ -109,7 +107,7 @@ public class TileEntityPeripheral extends TileEntity implements IPeripheral
         			return new Object[] {false, "Player does not exist!"};
         		}
         	}
-        	case 6: {
+        	case 6: { //Tests to see if the player is on the server and then damages the player by the specified amount if they do exist
         		EntityPlayer player = this.worldObj.getPlayerEntityByName((String) arguments[0]);
         		if (player != null) {
         			player.attackEntityFrom(DamageSource.onFire, ((Double)arguments[1]).intValue());
@@ -119,7 +117,7 @@ public class TileEntityPeripheral extends TileEntity implements IPeripheral
         		}
             	
         	}
-        	case 7: {
+        	case 7: { //Sets the specified player's position
         		if (arguments.length < 4) {
         			return new Object[] {"Requires 4 arguments"};
         		} else {
@@ -135,16 +133,16 @@ public class TileEntityPeripheral extends TileEntity implements IPeripheral
 	    			}
         		}
         	}
-        	case 8: {
-        		if (arguments.length < 2) {
-        			return new Object[] {false, "Requires 2 arguments"};
+        	case 8: { //Gives the given player the specified amount of the item
+        		if (arguments.length < 3) {
+        			return new Object[] {false, "Requires 3 arguments"};
         		} else {
-	        		int id = ((Double) arguments[0]).intValue();
-	        		int amount = ((Double) arguments[1]).intValue();
+	        		int id = ((Double) arguments[1]).intValue();
+	        		int amount = ((Double) arguments[2]).intValue();
 	        		return new Object[] {givePlayer((String) arguments[0],id, amount)};
         		}
         	}
-        	case 9: {
+        	case 9: { //Returns the username of the player at userlist[given integer]
         		if (arguments.length < 1) {
         			return new Object[] {"Requires an integer"};
         		} else {
@@ -152,13 +150,13 @@ public class TileEntityPeripheral extends TileEntity implements IPeripheral
 	        		String[] users = server.getAllUsernames();
 	        		int thevalue = ((Double) arguments[0]).intValue() - 1;
 	        		if (thevalue > users.length || thevalue < 0) {
-	        			return new Object[] {"Not that many players on the server"};
+	        			return new Object[] {"There are not that many players on the server"};
 	        		} else {
 	        			return new Object[] {users[thevalue]};
 	        		}
         		}
         	}
-        	case 10: {
+        	case 10: { //Adds a chat message
         		if (arguments.length < 1) {
         			return new Object[] {false, "Requires a string value"};
         		} else {
@@ -175,7 +173,7 @@ public class TileEntityPeripheral extends TileEntity implements IPeripheral
 	        		}
         		}
         	}
-        	case 11: {
+        	case 11: { //Create a large fireball and spawn it in the world at thisX,thisY,thisZ with velocities of x,y,z
         		if (arguments.length < 6) {
         			return new Object[] {false, "Requires 6 arguments"};
         		} else {
@@ -190,7 +188,7 @@ public class TileEntityPeripheral extends TileEntity implements IPeripheral
 	        		return new Object[] {true};
         		}
         	}
-        	case 12: {
+        	case 12: { //Gets the requested player's look vectors
         		if (arguments.length < 1) {
         			return new Object[] {"Requires a player username"};
         		} else {
@@ -202,7 +200,7 @@ public class TileEntityPeripheral extends TileEntity implements IPeripheral
 	        		return new Object[] {x,y,z}; 
         		}
         	}
-        	case 13: {
+        	case 13: { //Creates an explosion at the given coordinates with the given damage value
         		if (arguments.length < 4) {
         			return new Object[] {false,"Not enough arguments"};
         		} else {
@@ -217,7 +215,7 @@ public class TileEntityPeripheral extends TileEntity implements IPeripheral
 	        		return new Object[] {true};
         		}
         	}
-        	case 14: {
+        	case 14: { //Gets the direction the attached computer/turtle is facing
         		int[] coords = getComputer();
         		int x = coords[0];
         		int y = coords[1];
@@ -273,7 +271,7 @@ public class TileEntityPeripheral extends TileEntity implements IPeripheral
             return null;
         }
         
-        private int[] getComputer() {
+        private int[] getComputer() { //A function to determine the computer's position in the world
         	int cX = this.xCoord;
         	int cY = this.yCoord;
         	int cZ = this.zCoord;
@@ -302,7 +300,7 @@ public class TileEntityPeripheral extends TileEntity implements IPeripheral
 		}
 
 
-		public boolean givePlayer(String username, int itemID, int itemAmount) {
+		public boolean givePlayer(String username, int itemID, int itemAmount) { //A function to give the player items
         	ItemStack unknownItemStack = new ItemStack(itemID, itemAmount, 0);
         	EntityPlayer player = this.worldObj.getPlayerEntityByName(username);
         	if (player != null){
@@ -312,7 +310,7 @@ public class TileEntityPeripheral extends TileEntity implements IPeripheral
         	}
         }
         
-        public boolean isComputer(int x, int y, int z) {
+        public boolean isComputer(int x, int y, int z) { //Checks to see if the specified x,y,z coordinates are inhabited by a computer or turtle
         	int id1 = ComputerCraft.computerBlockID;
         	int id2 = CCTurtle.turtleBlockID;
         	int id3 = CCTurtle.turtleUpgradedBlockID;
@@ -326,26 +324,18 @@ public class TileEntityPeripheral extends TileEntity implements IPeripheral
         	
         }
         
-        
-        public int getHealth() {
-        	EntityLiving ent = BlockPeripheralBlock.entityLiving;
-        	int health = ent.getHealth();
-        	return health;
-        }
   
-        public boolean canAttachToSide(int side)
+        public boolean canAttachToSide(int side) //Auto-generated stub
         {
                 return true;
 
         }
         
-        public void attach(IComputerAccess computer, String computerSide)
+        public void attach(IComputerAccess computer, String computerSide) //Auto-generated stub
         {
-        	side = computerSide;
-        	comp = computer;
         }
         
-        public void detach(IComputerAccess computer)
+        public void detach(IComputerAccess computer) //Auto-generated stub
         {
         }
 }
